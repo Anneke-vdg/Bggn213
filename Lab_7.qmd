@@ -1,0 +1,226 @@
+---
+title: "Class_7"
+format: pdf
+editor: visual
+---
+
+```{r}
+url <- "https://tinyurl.com/UK-foods"
+x <- read.csv(url)
+dim(x)
+```
+
+Q1. How many rows and columns are in your new data frame named x? What R functions could you use to answer this question?
+
+There are 17 rows and 5 columns in this data frame.
+
+You could use dim(), nrow(), or ncol(), to find the number of rows and columns in this dataframe.
+
+```{r}
+##preview the first 6 rows
+head(x)
+```
+
+```{r}
+rownames(x) <- x[,1]
+x <- x[,-1]
+head(x)
+
+#Could also do
+#url <- "https://tinyurl.com/UK-foods"
+#x <- read.csv(url, row.names = 1)
+#head(x)
+#Automatically sets the first row as row names
+```
+
+```{r}
+dim(x)
+```
+
+Q2. Which approach to solving the "row-names" problem mentioned above do you prefer and why?
+
+Well if you know apriori that the first row of the imported data will be the rownames, then I prefer the x \<- read.csv(url, row.names = 1) method, because I find it shorter and more convenient.
+
+```{r}
+barplot(as.matrix(x), beside=T, col=rainbow(nrow(x)))
+```
+
+Q3. Changing what optional argument in the above barplot() function results in the following plot?
+
+You change the beside arguement from T to F to create a stacked barplot.
+
+Q5. Generating all pairwise plots may help somewhat. Can you make sense of the following code and resulting figure? What does it mean if a given point lies on the diagonal for a given plot?
+
+The code above does a pairwise comparison for each country across each variable. If a point lies on the diagonal then it is equal in both countries, if its above or below then that indicates it is consumed to a greater degree in the corresponding country.
+
+```{r}
+#Q3
+barplot(as.matrix(x), beside=F, col=rainbow(nrow(x)))
+#Q5
+pairs(x, col=rainbow(10), pch=16)
+```
+
+Q6. What is the main difference between N. Ireland and the other countries of the UK in terms of this data-set?
+
+```{r}
+pca <- prcomp(t(x))
+summary(pca)
+```
+
+Q7. Complete the code below to generate a plot of PC1 vs PC2. The second line adds text labels over the data points.
+
+```{r}
+plot(pca$x[,1], pca$x[,2], xlab = "PC1", ylab="PC2", xlim=c(-270,500))
+text(pca$x[,1], pca$x[,2], colnames(x))
+```
+
+Q8. Customize your plot so that the colors of the country names match the colors in our UK and Ireland map and table at the start of this document.
+
+```{r}
+plot(pca$x[,1], pca$x[,2], xlab = "PC1", ylab="PC2", xlim=c(-270,500))
+text(pca$x[,1], pca$x[,2], colnames(x), col = c("orange", "red", "blue", "darkgreen"))
+```
+
+```{r}
+v <- round( pca$sdev^2/sum(pca$sdev^2) * 100 )
+v
+
+z <- summary(pca)
+z$importance
+```
+
+```{r}
+barplot(v, xlab="Principal Component", ylab= "Percent Variation")
+```
+
+```{r}
+par(mar=c(10, 3, 0.35, 0))
+barplot( pca$rotation[,1], las=2 )
+```
+
+Q9. Generate a similar 'loadings plot' for PC2. What two food groups feature prominantly and what does PC2 mainly tell us about?
+
+Fresh potatoes and soft drinks are the two food groups that feature predominantly in the loadings of PC2. PC2 describes the second most variation in the data set, in this case on the Y axis, it describes the pusing of points up and down.
+
+```{r}
+par(mar=c(10, 3, 0.35, 0))
+barplot( pca$rotation[,2], las=2 )
+```
+
+```{r}
+library(ggplot2)
+
+df <- as.data.frame(pca$x)
+df_lab <- tibble::rownames_to_column(df, "Country")
+ggplot(df_lab) + 
+  aes(PC1, PC2, col=Country) + 
+  geom_point()
+```
+
+```{r}
+ggplot(df_lab) + 
+  aes(PC1, PC2, col=Country, label=Country) + 
+  geom_hline(yintercept = 0, col="gray") +
+  geom_vline(xintercept = 0, col="gray") +
+  geom_point(show.legend = FALSE) +
+  geom_label(hjust=1, nudge_x = -10, show.legend = FALSE) +
+  expand_limits(x = c(-300,500)) +
+  xlab("PC1 (67.4%)") +
+  ylab("PC2 (28%)") +
+  theme_bw()
+```
+
+```{r}
+ld <- as.data.frame(pca$rotation)
+ld_lab <- tibble::rownames_to_column(ld, "Food")
+
+ggplot(ld_lab) +
+  aes(PC1, Food) +
+  geom_col()
+```
+
+```{r}
+ggplot(ld_lab) +
+  aes(PC1, reorder(Food, PC1), bg=PC1) +
+  geom_col() + 
+  xlab("PC1 Loadings/Contributions") +
+  ylab("Food Group") +
+  scale_fill_gradient2(low="purple", mid="gray", high="darkgreen", guide=NULL) +
+  theme_bw()
+```
+
+```{r}
+biplot(pca)
+```
+
+```{r}
+url2 <- "https://tinyurl.com/expression-CSV"
+rna.data <- read.csv(url2, row.names=1)
+head(rna.data)
+```
+
+Q10. How many genes and samples are in this dataset?
+
+There are 100 genes and 10 samples in this data set.
+
+```{r}
+dim(rna.data)
+```
+
+```{r}
+pca <- prcomp(t(rna.data), scale=TRUE)
+plot(pca$x[,1], pca$x[,2], xlab="PC1", ylab="PC2")
+summary(pca)
+```
+
+```{r}
+plot(pca, main="Quick scree plot")
+pca.var <- pca$sdev^2
+pca.var.per <- round(pca.var/sum(pca.var)*100, 1)
+pca.var.per
+barplot(pca.var.per, main="Scree Plot", 
+        names.arg = paste0("PC", 1:10),
+        xlab="Principal Component", ylab="Percent Variation")
+```
+
+```{r}
+colvec <- colnames(rna.data)
+colvec[grep("wt", colvec)] <- "red"
+colvec[grep("ko", colvec)] <- "blue"
+
+plot(pca$x[,1], pca$x[,2], col=colvec, pch=16,
+     xlab=paste0("PC1 (", pca.var.per[1], "%)"),
+     ylab=paste0("PC2 (", pca.var.per[2], "%)"))
+
+text(pca$x[,1], pca$x[,2], labels = colnames(rna.data), pos=c(rep(4,5), rep(2,5)))
+```
+
+```{r}
+df <- as.data.frame(pca$x)
+ggplot(df) + 
+  aes(PC1, PC2) + 
+  geom_point()
+```
+
+```{r}
+df$samples <- colnames(rna.data) 
+df$condition <- substr(colnames(rna.data),1,2)
+p <- ggplot(df) + 
+        aes(PC1, PC2, label=samples, col=condition) + 
+        geom_label(show.legend = FALSE)
+p
+
+p + labs(title="PCA of RNASeq Data",
+       subtitle = "PC1 clealy seperates wild-type from knock-out samples",
+       x=paste0("PC1 (", pca.var.per[1], "%)"),
+       y=paste0("PC2 (", pca.var.per[2], "%)"),
+       caption="Class example data") +
+     theme_bw()
+
+loading_scores <- pca$rotation[,1]
+gene_scores <- abs(loading_scores) 
+gene_score_ranked <- sort(gene_scores, decreasing=TRUE)
+top_10_genes <- names(gene_score_ranked[1:10])
+top_10_genes
+sessionInfo()
+```
