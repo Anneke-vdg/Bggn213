@@ -1,0 +1,90 @@
+---
+title: "Class_6"
+format: pdf
+editor: visual
+---
+
+## Quarto
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## Running Code
+
+Read in gradebook csv from url
+
+```{r}
+url <- "https://bioboot.github.io/bggn213_S19/class-material/student_homework.csv"
+grade_book <- read.csv(url)
+colnames(grade_book)[1] <- "Students"
+```
+
+You can add options to executable code like this
+
+This section is the work through of the function in each step, the steps were then taken and put into the function in the order they were recorded here.
+
+```{r}
+#convert all na's to zero
+grade_book[is.na(grade_book)] <- 0
+#Identify what the lowest score is for every student in the class
+lowest_score <- apply(grade_book[, -1], 1, FUN = min)
+#Add lowest score to the grade sheet
+grade_book$lowest_score <- lowest_score
+#Sum all of the scores for the homework for each student in the class
+sum_grades <- apply(grade_book[,2:6], 1, FUN = sum)
+#Add the summed grades to the grade sheet
+grade_book$sum_grades <- sum_grades
+#The max score for the homework would be 400 with the lowest score dropped
+max_score <- 400
+#Calculate grades, with the lowest score subtracted from the sum total score
+grade_book$score <- ((grade_book$sum_grades - grade_book$lowest_score) / max_score) * 100
+```
+
+The grade function itself
+
+The return function was added to show the score as part of the class data frame, rather than just returning a score vector
+
+```{r}
+grade <- function(r){
+  r <- data.frame(r)
+  r[is.na(r)] <- 0
+  lowest_score <- apply(r[, -1], 1, FUN = min)
+  r$lowest_score <- lowest_score
+  sum_grades <- apply(r[,2:6], 1, FUN = sum)
+  r$sum_grades <- sum_grades
+  max_score <- 400
+  r$score <- ((r$sum_grades - r$lowest_score) / max_score) * 100
+  return(r)
+}
+```
+
+Use of the function
+
+Should be executed after loading the first chunk of code (the grade_book csv)
+
+```{r}
+grade_book_graded <- grade(grade_book)
+grade_book_graded
+```
+
+```{r}
+#Who was the top scoring student?
+grade_book_graded[which.max(grade_book_graded$score), ]
+#Student 18 was the highest scoring student with a grade of 94.5 %
+```
+
+```{r}
+#Which homework was the hardest for the students, ie which had the lowest average score
+grade_book[is.na(grade_book)] <- 0
+home_work_avg <- apply(grade_book[,2:6], 2, FUN = mean)
+home_work_avg
+which.min(home_work_avg)
+#Homework 2 was the hardest for the students with the average score being 72.8 out of 100
+```
+
+```{r}
+#Which homework was most predictive of overall performance?
+cor_scores <- cor(grade_book_graded[, c(2:6, 9)])
+cor_scores[, "score"]
+max(cor_scores[-6, "score"])
+#Homework 5 was most predictive with a corelation to total score of 0.6325982
+```
