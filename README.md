@@ -20,3 +20,5 @@ My classwork for W24 at UC San Diego [BGGN213 at UC San Diego] (https://anneke-v
  -CLass14: [DeSeq lab miniproject](https://github.com/Anneke-vdg/Bggn213/blob/main/DESeq_lab.md)
 
 -Pertussis: [Pertussis miniproject](https://github.com/Anneke-vdg/Bggn213/blob/main/Pertussis_mp.md)
+
+-RNA_seq: [RNA seq class mini project](https://github.com/Anneke-vdg/Bggn213/blob/main/RNA_seq_mini_project.md)
