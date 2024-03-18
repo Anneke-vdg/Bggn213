@@ -12,3 +12,5 @@ My classwork for W24 at UC San Diego [BGGN213 at UC San Diego] (https://anneke-v
  -Class8: [Unsupervised learning minipriject](https://github.com/Anneke-vdg/Bggn213/blob/main/Lab_8.md)
 
  -Class11: [Alpha fold](https://github.com/Anneke-vdg/Bggn213/blob/main/CLass_11.md)
+
+ -CLass14: [DeSeq lab miniproject](https://github.com/Anneke-vdg/Bggn213/blob/main/DESeq_lab.md)
